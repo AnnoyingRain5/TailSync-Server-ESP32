@@ -1,5 +1,5 @@
 {
-  description = "Nix devshells!";
+  description = "TailSync Server devshell";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
