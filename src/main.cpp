@@ -18,7 +18,7 @@ void handlePulsePacket() { Serial.println("[LOG]: pulse!"); }
 void handleEndSessionPacket() { Serial.println("[LOG]: End session"); }
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(921600);
   WiFi.mode(WIFI_STA);
 
   // Init ESP-NOW
@@ -40,23 +40,31 @@ void setup() {
 }
 
 void loop() {
-  uint8_t serialbuffer[3];
-  while (1) {
-    if (Serial.available() >= 3) {
-      break;
-    }
-  }
-  int message = Serial.readBytesUntil('\n', serialbuffer, sizeof(serialbuffer));
-  Serial.flush();
-  PacketHeader header = {0x54, 0x53, 0x01};
-  ColourPacket packet = {};
-  packet.colour[0][0].red = serialbuffer[0];
-  packet.colour[0][0].green = serialbuffer[1];
-  packet.colour[0][0].blue = serialbuffer[2];
+  static uint8_t serialBuffer[192];
+  uint16_t len =
+      Serial.readBytesUntil('\n', serialBuffer, sizeof(serialBuffer));
 
-  uint8_t buffer[sizeof(header) + sizeof(packet)];
-  memcpy(buffer, &header, sizeof(header));
-  memcpy(buffer + sizeof(header), &packet, sizeof(packet));
-  esp_now_send(Broadcast_MAC, buffer, sizeof(buffer));
-  delay(1000);
+  if (len < 192) {
+    return;
+  }
+
+  PacketHeader header{0x54, 0x53, 0x01};
+  ColourPacket packet{};
+
+  for (uint16_t i = 0; i < len; i += 3) {
+    uint16_t pixelIdx = i / 3;
+    uint16_t row = pixelIdx / 8;
+    uint16_t col = pixelIdx % 8;
+    packet.colour[row][col].red = serialBuffer[i];
+    packet.colour[row][col].green = serialBuffer[i + 1];
+    packet.colour[row][col].blue = serialBuffer[i + 2];
+  }
+
+  uint8_t out[sizeof(header) + sizeof(packet)];
+  memcpy(out, &header, sizeof(header));
+  memcpy(out + sizeof(header), &packet, sizeof(packet));
+
+  esp_now_send(Broadcast_MAC, out, sizeof(out));
+  Serial.flush();
+  Serial.write("data sent");
 }
