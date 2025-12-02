@@ -16,6 +16,7 @@
         packages = [
           pkgs.clang-tools
           pkgs.platformio
+          pkgs.qlcplus
 
           (pkgs.python3.withPackages (
             python-pkgs: with python-pkgs; [
