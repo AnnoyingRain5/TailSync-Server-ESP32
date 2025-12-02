@@ -16,6 +16,13 @@
         packages = [
           pkgs.clang-tools
           pkgs.platformio
+
+          (pkgs.python3.withPackages (
+            python-pkgs: with python-pkgs; [
+              pyserial
+              stupidartnet
+            ]
+          ))
         ];
         shellHook = "echo \"Want to compile TailSync? Run 'pio run' to compile, or 'pio run -t upload' to compile and upload it to your ESP!\"";
       };
