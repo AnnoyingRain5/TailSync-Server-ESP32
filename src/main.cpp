@@ -18,18 +18,6 @@ uint8_t genNonce() {
   return result;
 }
 
-void handleColourPacket(ColourPacket packet) {
-  logger.log(DEBUG, "Colour! r: %d g: %d b: %d", packet.colour[0][0].red,
-             packet.colour[0][0].green, packet.colour[0][0].blue);
-  logger.log(DEBUG, "Average head colour: %d",
-             AverageColour(packet.colour[1][3], packet.colour[1][4],
-                           packet.colour[2][3], packet.colour[2][4]));
-}
-
-void handlePulsePacket() { logger.log(DEBUG, "pulse!"); }
-
-void handleEndSessionPacket() { logger.log(DEBUG, "End session"); }
-
 void flushSerialRX() {
   while (Serial.available()) {
     Serial.read();
@@ -84,9 +72,9 @@ void loop() {
 
     // version 0 colour
     case 0x01: {
-      static uint8_t serialBuffer[192];
+      static uint8_t serialBuffer[90];
       uint16_t len = Serial.readBytes(serialBuffer, sizeof(serialBuffer));
-      if (len < 192) {
+      if (len < 90) {
         // timeout reached and not enough data
         versionTypeSet = false;
         flushSerialRX();
@@ -95,16 +83,8 @@ void loop() {
       }
 
       PacketHeader header{0x54, 0x53, 0x01, genNonce()};
-      ColourPacket packet{};
-
-      for (uint16_t i = 0; i < len; i += 3) {
-        uint16_t pixelIdx = i / 3;
-        uint16_t row = pixelIdx / 8;
-        uint16_t col = pixelIdx % 8;
-        packet.colour[row][col].red = serialBuffer[i];
-        packet.colour[row][col].green = serialBuffer[i + 1];
-        packet.colour[row][col].blue = serialBuffer[i + 2];
-      }
+      ColourPacket packet;
+      memcpy(&packet, serialBuffer, sizeof(ColourPacket));
       uint8_t out[sizeof(header) + sizeof(packet)];
       memcpy(out, &header, sizeof(header));
       memcpy(out + sizeof(header), &packet, sizeof(packet));
