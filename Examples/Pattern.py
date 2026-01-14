@@ -1,16 +1,31 @@
-# Example usage of the ESP TailLink Server
+# Example usage of the ESP TailSync Server
 # Sending some preset patterns, and a pulse packet for good measure.
 import serial
 import time
 import sys
 
-PORT = "/dev/ttyACM0"
+PORT = sys.argv[1]
 BAUD_RATE = 460800
 PAYLOAD_SIZE = 192
 
 # colour payloads
-PAYLOAD_1 = b"\x01" + b"\x50\x00\x00\x00\x50\x00\x00\x00\x50\x50\x50\x50" * 16
-PAYLOAD_2 = b"\x01" + b"\x00\x50\x00\x50\x50\x50\x50\x00\x00\x00\x00\x50" * 16
+PAYLOAD_1 = (
+    b"\x01"  # header
+    + (b"\x00\x00\x30" + b"\x30\x00\x00" + b"\x00\x30\x00") * 2  # head
+    + (b"\x00\x00\x30" + b"\x30\x00\x00" + b"\x00\x30\x00") * 2  # body
+    + (b"\x00\x00\x30" + b"\x30\x00\x00" + b"\x00\x30\x00") * 2  # arms
+    + (b"\x00\x00\x30" + b"\x30\x00\x00" + b"\x00\x30\x00") * 2  # legs
+    + (b"\x00\x00\x30" + b"\x30\x00\x00" + b"\x00\x30\x00") * 2  # tail
+)
+PAYLOAD_2 = (
+    b"\x01"  # header
+    + (b"\x00\x30\x00" + b"\x00\x00\x30" + b"\x30\x00\x00") * 2  # head
+    + (b"\x00\x30\x00" + b"\x00\x00\x30" + b"\x30\x00\x00") * 2  # body
+    + (b"\x00\x30\x00" + b"\x00\x00\x30" + b"\x30\x00\x00") * 2  # arms
+    + (b"\x00\x30\x00" + b"\x00\x00\x30" + b"\x30\x00\x00") * 2  # legs
+    + (b"\x00\x30\x00" + b"\x00\x00\x30" + b"\x30\x00\x00") * 2  # tail
+)
+print(len(PAYLOAD_1))
 PAYLOAD_3 = b"\x00"
 
 try:
