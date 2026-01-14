@@ -10,6 +10,12 @@
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs { inherit system; };
+      pythonEnv = pkgs.python3.withPackages (
+        python-pkgs: with python-pkgs; [
+          pyserial
+          stupidartnet
+        ]
+      );
     in
     {
       devShells.${system}.default = pkgs.mkShell {
@@ -17,15 +23,9 @@
           pkgs.clang-tools
           pkgs.platformio
           pkgs.qlcplus
-
-          (pkgs.python3.withPackages (
-            python-pkgs: with python-pkgs; [
-              pyserial
-              stupidartnet
-            ]
-          ))
+          pythonEnv
         ];
-        shellHook = "echo \"Want to compile TailSync? Run 'pio run' to compile, or 'pio run -t upload' to compile and upload it to your ESP!\"";
+        shellHook = "echo \"Want to compile TailSync? Run 'pio run' to compile, or 'pio run -t upload' to compile and upload it to your ESP! \nPython executable is at: ${pythonEnv.interpreter}\"";
       };
     };
 }
