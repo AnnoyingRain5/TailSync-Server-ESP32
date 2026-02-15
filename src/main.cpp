@@ -10,10 +10,10 @@ uint8_t version_type = 0;
 bool versionTypeSet = false;
 
 uint8_t genNonce() {
-  uint8_t result = (uint8_t)random(256);
+  uint8_t result = static_cast<uint8_t>(random(256));
   // if we get a collision, keep generating until we don't get one!
   while (result == lastNonce) {
-    result = (uint8_t)random(256);
+    result = static_cast<uint8_t>(random(256));
   }
   return result;
 }
@@ -58,7 +58,7 @@ void loop() {
 
     // version 0 pulse
     case 0x00: {
-      PacketHeader header{0x54, 0x53, 0x00, genNonce()};
+      const PacketHeader header{0x54, 0x53, 0x00, genNonce()};
       uint8_t out[sizeof(header)];
       memcpy(out, &header, sizeof(header));
 
@@ -73,7 +73,7 @@ void loop() {
     // version 0 colour
     case 0x01: {
       static uint8_t serialBuffer[90];
-      uint16_t len = Serial.readBytes(serialBuffer, sizeof(serialBuffer));
+      const uint16_t len = Serial.readBytes(serialBuffer, sizeof(serialBuffer));
       if (len < 90) {
         // timeout reached and not enough data
         versionTypeSet = false;
@@ -82,7 +82,7 @@ void loop() {
         return;
       }
 
-      PacketHeader header{0x54, 0x53, 0x01, genNonce()};
+      const PacketHeader header{0x54, 0x53, 0x01, genNonce()};
       ColourPacket packet;
       memcpy(&packet, serialBuffer, sizeof(ColourPacket));
       uint8_t out[sizeof(header) + sizeof(packet)];
