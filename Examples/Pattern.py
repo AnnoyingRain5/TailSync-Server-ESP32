@@ -25,7 +25,6 @@ PAYLOAD_2 = (
     + (b"\x00\x30\x00" + b"\x00\x00\x30" + b"\x30\x00\x00") * 2  # legs
     + (b"\x00\x30\x00" + b"\x00\x00\x30" + b"\x30\x00\x00") * 2  # tail
 )
-print(len(PAYLOAD_1))
 PAYLOAD_3 = b"\x00"
 
 try:
